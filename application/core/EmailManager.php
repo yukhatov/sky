@@ -53,7 +53,8 @@ class EmailManager implements EmailManagerInterface
     private function generateBody(int $userId) : string
     {
         $link = 'http://' .
-            $_SERVER['SERVER_NAME'] .
+            $_SERVER['SERVER_NAME'] . ':' .
+            $_SERVER['SERVER_PORT'] .
             $_SERVER['SCRIPT_NAME'] .
             sprintf("?route=user/activate&id=%d", $userId);
 

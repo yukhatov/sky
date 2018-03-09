@@ -11,7 +11,6 @@ namespace Controllers;
 use Core\Controller;
 use Models\ModelTask;
 use Models\ModelUser;
-use PHPUnit\Framework\Exception;
 
 /**
  * Class ControllerUser
@@ -31,7 +30,7 @@ class ControllerUser extends Controller
         } else {
             try {
                 $user = $this->getUser();
-            } catch(Exception $e) {
+            } catch(\Exception $e) {
                 return header(sprintf("Location: %s&error=%s", $this->config['route']['login'], $e->getMessage()));
             }
         }

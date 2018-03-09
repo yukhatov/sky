@@ -72,7 +72,7 @@ class Controller
         $user = (new ModelUser())->findById($_SESSION['login_user']);
 
         if ($user->getId() == 0) {
-            throw new Exception("User not found!");
+            throw new \Exception("User not found!");
         }
         
         return $user;
