@@ -79,7 +79,7 @@ class ModelUser extends Model
         $stmt->bindValue(':username', $this->username, SQLITE3_TEXT);
         $stmt->bindValue(':password', password_hash($this->password, PASSWORD_DEFAULT), SQLITE3_TEXT);
         $stmt->bindValue(':email', $this->email, SQLITE3_TEXT);
-        $stmt->bindValue(':is_active', $this->is_active, SQLITE3_INTEGER);
+        $stmt->bindValue(':is_active', 0, SQLITE3_INTEGER);
 
         return !empty($stmt->execute()) ? true : false;
     }

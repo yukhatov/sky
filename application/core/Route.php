@@ -8,8 +8,6 @@
 
 namespace Core;
 
-use PHPUnit\Framework\Exception;
-
 class Route
 {
     static function start()
@@ -44,13 +42,7 @@ class Route
         }
 
         if (method_exists($controller, $actionName)) {
-            try {
-                $controller->$actionName();    
-            } catch (Exception $e) {
-                echo "Woops... sorry: " . $e->getMessage();
-                exit;
-            }
-            
+            $controller->$actionName();    
         } else {
             Route::ErrorPage404();
         }

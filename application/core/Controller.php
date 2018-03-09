@@ -42,6 +42,10 @@ class Controller
         $this->view = $view;
         $this->emailManager = $emailManager;
         $this->config = @parse_ini_file(__DIR__ . '/../../config.ini', true);
+
+        if (!$this->config) {
+            throw new \Exception("Config file parsing error!");
+        }
     }
 
     /**
