@@ -1,0 +1,9 @@
+[db]
+db_name = "sky_test.db"
+[email]
+username = "~"
+password = "~"
+[route]
+login = "index.php?route=login/index"
+register = "index.php?route=register/index"
+user = "index.php?route=user/index"
