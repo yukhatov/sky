@@ -37,4 +37,6 @@ abstract class Model
      * @return bool
      */
     abstract public function edit($data) : bool;
+
+    abstract protected function mapResult(array $result);
 }

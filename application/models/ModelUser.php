@@ -108,11 +108,7 @@ class ModelUser extends Model
                 return $this;
             }
 
-            $this->id = $result['id'];
-            $this->username = $result['username']; 
-            $this->password = $result['password']; 
-            $this->email = $result['email']; 
-            $this->is_active = $result['is_active']; 
+            $this->mapResult($result);
         }
         
         return $this;
@@ -127,11 +123,7 @@ class ModelUser extends Model
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
         
         if ($result) {
-            $this->id = $result['id'];
-            $this->username = $result['username'];
-            $this->password = $result['password'];
-            $this->email = $result['email'];
-            $this->is_active = $result['is_active'];
+            $this->mapResult($result);
         }
 
         return $this;
@@ -146,11 +138,7 @@ class ModelUser extends Model
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
 
         if ($result) {
-            $this->id = $result['id'];
-            $this->username = $result['username'];
-            $this->password = $result['password'];
-            $this->email = $result['email'];
-            $this->is_active = $result['is_active'];
+            $this->mapResult($result);
         }
 
         return $this;
@@ -175,6 +163,8 @@ class ModelUser extends Model
 
     public function load($username, $email, $pass, $confirmPass)
     {
+        //TODO: add password and email validation
+        
         if (
             $username != "" and
             $email != "" and
@@ -190,5 +180,14 @@ class ModelUser extends Model
         }
 
         return false;
+    }
+
+    protected function mapResult(array $result)
+    {
+        $this->id = $result['id'] ?? "";
+        $this->username = $result['username'] ?? "";
+        $this->password = $result['password'] ?? "";
+        $this->email = $result['email'] ?? "";
+        $this->is_active = $result['is_active'] ?? 0;
     }
 }
