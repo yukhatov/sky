@@ -20,11 +20,22 @@ abstract class Model
     public $db;
 
     /**
-     * Model constructor.
+     * @var UserValidator
      */
-    function __construct()
+    public $validator;
+
+    /**
+     * Model constructor.
+     * @param ValidatorInterface|null $validator
+     */
+    function __construct(ValidatorInterface $validator = null)
     {
         $this->db = SqliteDatabaseConnection::getInstance()->db;
+        $this->validator = $validator;
+        
+        if (!$this->validator) {
+            $this->validator = new UserValidator();    
+        }
     }
 
     /**
@@ -38,5 +49,14 @@ abstract class Model
      */
     abstract public function edit($data) : bool;
 
+    /**
+     * @param array $result
+     * @return mixed
+     */
     abstract protected function mapResult(array $result);
+
+    /**
+     * @return bool
+     */
+    abstract public function isValid() : bool;
 }

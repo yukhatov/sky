@@ -48,10 +48,14 @@ class Route
         }
     }
 
-    function ErrorPage404()
+    static function ErrorPage404()
     {
-        header('HTTP/1.1 404 Not Found');
-        header("Status: 404 Not Found");
-        header('Location: index.php?route=404');
+        $config = @parse_ini_file(__DIR__ . '/../../config.ini', true);
+
+        if (!$config) {
+            throw new \Exception("Config file parsing error!");
+        }
+
+        return header(sprintf("Location: %s", $config['route']['404']));
     }
 }

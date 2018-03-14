@@ -56,11 +56,21 @@ class ControllerUser extends Controller
             $user = (new ModelUser())->findById($_GET['id']);
 
             if ($user->getId() != 0 and $user->activate()) {
-                return header(sprintf("Location: %s&success=User+activated!", $this->config['route']['login']));
+                return header(sprintf(
+                        "Location: %s&success=%s",
+                        $this->config['route']['login'],
+                        urlencode('User activated!')
+                    )
+                );
             }
         }
 
-        return header(sprintf("Location: %s&error=User+not+found!", $this->config['route']['login']));
+        return header(sprintf(
+                "Location: %s&error=%s",
+                $this->config['route']['login'],
+                urlencode('User not found!')
+            )
+        );
     }
 
     /**
@@ -71,12 +81,32 @@ class ControllerUser extends Controller
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = (new ModelUser())->findById($_POST['id'] ?? "");
 
-            if ($user->getId() != 0 and $user->edit($_POST)) {
-                return header(sprintf("Location: %s&success=User+edited!", $this->config['route']['user']));
-
+            if ($user->getId() == 0) {
+                return header(sprintf(
+                        "Location: %s&error=%s",
+                        $this->config['route']['user'],
+                        urlencode('User not found!')
+                    )
+                );
             }
 
-            return header(sprintf("Location: %s&error=User+not+found!", $this->config['route']['user']));
+
+
+            /*if ($user->getId() != 0 and $user->edit($_POST)) {
+                return header(sprintf(
+                        "Location: %s&success=%s",
+                        $this->config['route']['user'],
+                        urlencode('User edited!')
+                    )
+                );
+            }
+
+            return header(sprintf(
+                    "Location: %s&error=%s",
+                    $this->config['route']['user'],
+                    urlencode('User not found!')
+                )
+            );*/
         }
     }
 
@@ -89,29 +119,45 @@ class ControllerUser extends Controller
             $user = new ModelUser();
 
             if (
-                $user->load(
+                !$user->load(
                     $_POST["username"] ?? "",
                     $_POST["email"] ?? "",
                     $_POST["pass"] ?? "",
                     $_POST["confirm-pass"] ?? ""
                 )
             ) {
-                if ($user->create()) {
-                    $this->emailManager->send($user->getUsername());
-
-                    return header(sprintf(
-                        "Location: %s&success=User: %s created. Please check your email for activation.",
-                        $this->config['route']['register'],
-                        $user->getUsername()));
-                }
-
                 return header(sprintf(
-                    "Location: %s&error=User: %s already exists!",
-                    $this->config['route']['register'],
-                    $user->getUsername()));
+                        "Location: %s&error=%s",
+                        $this->config['route']['register'],
+                        urlencode('All fields required!')
+                    )
+                );
             }
 
-            return header(sprintf("Location: %s&error=All+fields+required!", $this->config['route']['register']));
+            if (!$user->isValid()) {
+                return header(sprintf(
+                        "Location: %s&error=%s",
+                        $this->config['route']['register'],
+                        urlencode('Email is incorrect!')
+                    )
+                );
+            }
+
+            if ($user->create()) {
+                $this->emailManager->send($user->getUsername());
+
+                return header(sprintf(
+                    "Location: %s&success=%s",
+                    $this->config['route']['register'],
+                    urlencode('User: ' . $user->getUsername() . ' created. Please check your email for activation.')));
+            }
+
+            return header(sprintf(
+                    "Location: %s&error=%s",
+                    $this->config['route']['register'],
+                    urlencode('User: ' . $user->getUsername() . ' already exists!')
+                )
+            );
         }
 
         return header(sprintf("Location: %s", $this->config['route']['login']));
@@ -140,9 +186,11 @@ class ControllerUser extends Controller
             if ($user->getId() != 0) {
                 if (!$user->getIsActive()) {
                     return header(sprintf(
-                        "Location: %s&error=User+not+activated!+Please+Check+email.",
-                        $this->config['route']['login']
-                    ));
+                            "Location: %s&error=%s",
+                            $this->config['route']['login'],
+                            urlencode('User not activated! Please Check email.')
+                        )
+                    );
                 }
 
                 session_start();
@@ -152,7 +200,12 @@ class ControllerUser extends Controller
                 return header(sprintf("Location: %s", $this->config['route']['user']));
             }
 
-            return header(sprintf("Location: %s&error=Invalid+credentials!", $this->config['route']['login']));
+            return header(sprintf(
+                    "Location: %s&error=%s",
+                    $this->config['route']['login'],
+                    urlencode('Invalid credentials!')
+                )
+            );
         }
 
         return header(sprintf("Location: %s", $this->config['route']['login']));

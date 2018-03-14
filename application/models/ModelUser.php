@@ -33,14 +33,6 @@ class ModelUser extends Model
     private $is_active;
 
     /**
-     * ModelTask constructor.
-     */
-    function __construct()
-	{
-		parent::__construct();
-	}
-
-    /**
      * @return mixed
      */
     public function getUsername()
@@ -163,7 +155,8 @@ class ModelUser extends Model
 
     public function load($username, $email, $pass, $confirmPass)
     {
-        //TODO: add password and email validation
+        // TODO: set default values and make possible to load just email
+        
         
         if (
             $username != "" and
@@ -189,5 +182,10 @@ class ModelUser extends Model
         $this->password = $result['password'] ?? "";
         $this->email = $result['email'] ?? "";
         $this->is_active = $result['is_active'] ?? 0;
+    }
+
+    public function isValid() : bool
+    {
+        return $this->validator->isValid($this);
     }
 }
