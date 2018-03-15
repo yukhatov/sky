@@ -17,4 +17,13 @@ class UserValidator implements ValidatorInterface
     {
         return filter_var($user->getEmail(), FILTER_VALIDATE_EMAIL);
     }
+    
+    public function prepareValue($value) : string
+    {
+        $value = strip_tags($value);
+        $value = htmlentities($value, ENT_QUOTES, "UTF-8");
+        $value = htmlspecialchars($value, ENT_QUOTES);
+        
+        return $value;
+    }
 }

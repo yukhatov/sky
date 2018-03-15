@@ -67,6 +67,8 @@ abstract class Model
      */
     public function loadProperty(string $propertyName, string $propertyValue) : bool
     {
+        $propertyValue = $this->validator->prepareValue($propertyValue);
+        
         if (
             $propertyValue != ""
         ) {

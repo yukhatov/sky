@@ -194,6 +194,10 @@ class ModelUser extends Model
      */
     public function load($username, $email, $pass, $confirmPass) : bool
     {
+        $username = $this->validator->prepareValue($username);
+        $email = $this->validator->prepareValue($email);
+        $pass = $this->validator->prepareValue($pass);
+        
         if (
             $username != "" and
             $email != "" and
