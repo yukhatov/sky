@@ -21,17 +21,22 @@ class Controller
     /**
      * @var ViewInterface
      */
-    public $view;
+    protected $view;
 
     /**
      * @var EmailManagerInterface
      */
-    public $emailManager;
+    protected $emailManager;
 
     /**
      * @var array
      */
-    public $config;
+    protected $config;
+
+    /**
+     * @var
+     */
+    protected $user;
 
     /**
      * Controller constructor.
@@ -61,20 +66,19 @@ class Controller
 
         return false;
     }
-
-    /**
-     * @return Model
-     * 
-     * @throws Exception if user not found.
-     */
-    protected function getUser() : Model
+    
+    protected function auth()
     {
+        if (!$this->isLoggedIn()) {
+            throw new \Exception("User not found!");
+        }
+
         $user = (new ModelUser())->findById($_SESSION['login_user']);
 
         if ($user->getId() == 0) {
             throw new \Exception("User not found!");
         }
-        
-        return $user;
+
+        $this->user = $user;
     }
 }

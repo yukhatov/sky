@@ -16,8 +16,6 @@ if ($data['error'] != "") {
 <br>
 <form action="index.php?route=user/edit" id="operation-form" method="post">
     <div id="username" class="col-md-3 col-sm-6 col-xs-12">
-        <input id="id-input" type="hidden" class="form-control" name="id" value=<?php echo $data['user']->getId(); ?>>
-
         <label>Email:</label>
         <input id="email-input" type="text" class="form-control" name="email" value=<?php echo $data['user']->getEmail(); ?>>
         <br>

@@ -26,21 +26,17 @@ class ControllerUser extends Controller
      */
     public function actionIndex()
     {
-        if (!$this->isLoggedIn()) {
-            return header(sprintf("Location: %s", $this->config['route']['login']));
-        } else {
-            try {
-                $user = $this->getUser();
-            } catch(\Exception $e) {
-                return header(sprintf("Location: %s&error=%s", $this->config['route']['login'], $e->getMessage()));
-            }
+        try {
+            $this->auth();
+        } catch(\Exception $e) {
+            return header(sprintf("Location: %s&error=%s", $this->config['route']['login'], $e->getMessage()));
         }
 
         return $this->view->generate(
             'userView.php',
             'templateView.php',
             [
-                'user' => $user,
+                'user' => $this->user,
                 'error' => $_GET['error'] ?? "",
                 'success' => $_GET['success'] ?? "",
                 'is_logged_in' => true
@@ -79,10 +75,14 @@ class ControllerUser extends Controller
      */
     public function actionEdit()
     {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $user = (new ModelUser())->findById($_POST['id'] ?? "");
+        try {
+            $this->auth();
+        } catch(\Exception $e) {
+            return header(sprintf("Location: %s&error=%s", $this->config['route']['login'], $e->getMessage()));
+        }
 
-            if ($user->getId() == 0) {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($this->user->getId() == 0) {
                 return header(sprintf(
                         "Location: %s&error=%s",
                         $this->config['route']['user'],
@@ -91,7 +91,7 @@ class ControllerUser extends Controller
                 );
             }
 
-            if (!$user->loadProperty('email', $_POST['email'] ?? '')) {
+            if (!$this->user->loadProperty('email', $_POST['email'] ?? '')) {
                 return header(sprintf(
                         "Location: %s&error=%s",
                         $this->config['route']['user'],
@@ -101,7 +101,7 @@ class ControllerUser extends Controller
             }
 
             try {
-                if ($user->edit()) {
+                if ($this->user->edit()) {
                     return header(sprintf(
                             "Location: %s&success=%s",
                             $this->config['route']['user'],
