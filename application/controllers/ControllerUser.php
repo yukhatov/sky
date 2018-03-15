@@ -9,6 +9,7 @@
 namespace Controllers;
 
 use Core\Controller;
+use Core\InvalidDataException;
 use Models\ModelTask;
 use Models\ModelUser;
 
@@ -90,13 +91,29 @@ class ControllerUser extends Controller
                 );
             }
 
-
-
-            /*if ($user->getId() != 0 and $user->edit($_POST)) {
+            if (!$user->loadProperty('email', $_POST['email'] ?? '')) {
                 return header(sprintf(
-                        "Location: %s&success=%s",
+                        "Location: %s&error=%s",
                         $this->config['route']['user'],
-                        urlencode('User edited!')
+                        urlencode('Invalid data entered!')
+                    )
+                );
+            }
+
+            try {
+                if ($user->edit()) {
+                    return header(sprintf(
+                            "Location: %s&success=%s",
+                            $this->config['route']['user'],
+                            urlencode('User edited!')
+                        )
+                    );
+                }
+            } catch (InvalidDataException $e) {
+                return header(sprintf(
+                        "Location: %s&error=%s",
+                        $this->config['route']['user'],
+                        urlencode($e->getMessage())
                     )
                 );
             }
@@ -104,9 +121,9 @@ class ControllerUser extends Controller
             return header(sprintf(
                     "Location: %s&error=%s",
                     $this->config['route']['user'],
-                    urlencode('User not found!')
+                    urlencode('This email already used!')
                 )
-            );*/
+            );
         }
     }
 
@@ -134,28 +151,28 @@ class ControllerUser extends Controller
                 );
             }
 
-            if (!$user->isValid()) {
+            try {
+                if ($user->create()) {
+                    $this->emailManager->send($user->getUsername());
+
+                    return header(sprintf(
+                        "Location: %s&success=%s",
+                        $this->config['route']['register'],
+                        urlencode('User: ' . $user->getUsername() . ' created. Please check your email for activation.')));
+                }
+            } catch (InvalidDataException $e) {
                 return header(sprintf(
                         "Location: %s&error=%s",
                         $this->config['route']['register'],
-                        urlencode('Email is incorrect!')
+                        urlencode($e->getMessage())
                     )
                 );
-            }
-
-            if ($user->create()) {
-                $this->emailManager->send($user->getUsername());
-
-                return header(sprintf(
-                    "Location: %s&success=%s",
-                    $this->config['route']['register'],
-                    urlencode('User: ' . $user->getUsername() . ' created. Please check your email for activation.')));
             }
 
             return header(sprintf(
                     "Location: %s&error=%s",
                     $this->config['route']['register'],
-                    urlencode('User: ' . $user->getUsername() . ' already exists!')
+                    urlencode('This user already exists!')
                 )
             );
         }

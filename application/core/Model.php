@@ -17,12 +17,12 @@ abstract class Model
     /**
      * @var mysqli
      */
-    public $db;
+    protected $db;
 
     /**
      * @var UserValidator
      */
-    public $validator;
+    protected $validator;
 
     /**
      * Model constructor.
@@ -47,7 +47,7 @@ abstract class Model
      * @param array $data
      * @return bool
      */
-    abstract public function edit($data) : bool;
+    abstract public function edit() : bool;
 
     /**
      * @param array $result
@@ -59,4 +59,22 @@ abstract class Model
      * @return bool
      */
     abstract public function isValid() : bool;
+
+    /**
+     * @param string $propertyName
+     * @param string $propertyValue
+     * @return bool
+     */
+    public function loadProperty(string $propertyName, string $propertyValue) : bool
+    {
+        if (
+            $propertyValue != ""
+        ) {
+            $this->$propertyName = $propertyValue;
+
+            return true;
+        }
+
+        return false;
+    }
 }

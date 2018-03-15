@@ -2,6 +2,7 @@
 
 namespace Models;
 
+use Core\InvalidDataException;
 use Core\Model;
 
 /**
@@ -13,24 +14,24 @@ class ModelUser extends Model
     /**
      * @var
      */
-    private $id;
+    protected $id;
     /**
      * @var
      */
-    private $username;
+    protected $username;
 
     /**
      * @var
      */
-    private $password;
+    protected $password;
     /**
      * @var
      */
-    private $email;
+    protected $email;
     /**
      * @var
      */
-    private $is_active;
+    protected $is_active;
 
     /**
      * @return mixed
@@ -64,6 +65,10 @@ class ModelUser extends Model
         return $this->id;
     }
 
+    /**
+     * @return bool
+     * @throws InvalidDataException if model not valid
+     */
     public function create() : bool
     {
         $stmt = $this->db->prepare('INSERT INTO user(username, password, email, is_active) VALUES (:username, :password, :email, :is_active)');
@@ -72,21 +77,37 @@ class ModelUser extends Model
         $stmt->bindValue(':password', password_hash($this->password, PASSWORD_DEFAULT), SQLITE3_TEXT);
         $stmt->bindValue(':email', $this->email, SQLITE3_TEXT);
         $stmt->bindValue(':is_active', 0, SQLITE3_INTEGER);
+        
+        if (!$this->isValid()) {
+            throw new InvalidDataException();
+        }
 
         return !empty($stmt->execute()) ? true : false;
     }
 
-    public function edit($data) : bool
+    /**
+     * @return bool
+     * @throws InvalidDataException if model not valid
+     */
+    public function edit() : bool
     {
         $stmt = $this->db->prepare('UPDATE user SET email=:email WHERE id=:id');
 
-        $stmt->bindValue(':email', $data['email'] ?? "", SQLITE3_TEXT);
+        $stmt->bindValue(':email', $this->email, SQLITE3_TEXT);
         $stmt->bindValue(':id', $this->id, SQLITE3_TEXT);
+
+        if (!$this->isValid()) {
+            throw new InvalidDataException();
+        }
 
         return !empty($stmt->execute()) ? true : false;
     }
 
-    
+    /**
+     * @param string $username
+     * @param string $password
+     * @return Model
+     */
     public function findByUsernameAndPassword(string $username, string $password) : Model
     {
         $stmt = $this->db->prepare('SELECT * FROM user WHERE username=:username LIMIT 1');
@@ -106,6 +127,10 @@ class ModelUser extends Model
         return $this;
     }
 
+    /**
+     * @param int $id
+     * @return Model
+     */
     public function findById(int $id) : Model
     {
         $stmt = $this->db->prepare('SELECT * FROM user WHERE id=:id LIMIT 1');
@@ -121,6 +146,10 @@ class ModelUser extends Model
         return $this;
     }
 
+    /**
+     * @param string $username
+     * @return Model
+     */
     public function findByUsername(string $username) : Model
     {
         $stmt = $this->db->prepare('SELECT * FROM user WHERE username=:username LIMIT 1');
@@ -135,7 +164,10 @@ class ModelUser extends Model
 
         return $this;
     }
-    
+
+    /**
+     * @return bool
+     */
     public function activate()
     {
         $sql = sprintf(
@@ -153,11 +185,15 @@ class ModelUser extends Model
         return false;
     }
 
-    public function load($username, $email, $pass, $confirmPass)
+    /**
+     * @param $username
+     * @param $email
+     * @param $pass
+     * @param $confirmPass
+     * @return bool
+     */
+    public function load($username, $email, $pass, $confirmPass) : bool
     {
-        // TODO: set default values and make possible to load just email
-        
-        
         if (
             $username != "" and
             $email != "" and
@@ -175,6 +211,9 @@ class ModelUser extends Model
         return false;
     }
 
+    /**
+     * @param array $result
+     */
     protected function mapResult(array $result)
     {
         $this->id = $result['id'] ?? "";
@@ -184,6 +223,9 @@ class ModelUser extends Model
         $this->is_active = $result['is_active'] ?? 0;
     }
 
+    /**
+     * @return bool
+     */
     public function isValid() : bool
     {
         return $this->validator->isValid($this);
