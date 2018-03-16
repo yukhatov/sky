@@ -2,7 +2,6 @@
 
 namespace Models;
 
-use Core\InvalidDataException;
 use Core\Model;
 
 /**
@@ -34,11 +33,24 @@ class ModelUser extends Model
     protected $is_active;
 
     /**
+     * @var
+     */
+    protected $activation_token;
+
+    /**
      * @return mixed
      */
     public function getUsername()
     {
         return $this->username;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getActivationToken()
+    {
+        return $this->activation_token;
     }
 
     /**
@@ -71,15 +83,17 @@ class ModelUser extends Model
      */
     public function create() : bool
     {
-        $stmt = $this->db->prepare('INSERT INTO user(username, password, email, is_active) VALUES (:username, :password, :email, :is_active)');
+        $stmt = $this->db->prepare('INSERT INTO user(username, password, email, activation_token, is_active) VALUES (:username, :password, :email, :activation_token, :is_active)');
+        $this->generateActivationToken();
 
         $stmt->bindValue(':username', $this->username, SQLITE3_TEXT);
         $stmt->bindValue(':password', password_hash($this->password, PASSWORD_DEFAULT), SQLITE3_TEXT);
         $stmt->bindValue(':email', $this->email, SQLITE3_TEXT);
+        $stmt->bindValue(':activation_token', $this->activation_token, SQLITE3_TEXT);
         $stmt->bindValue(':is_active', 0, SQLITE3_INTEGER);
         
         if (!$this->isValid()) {
-            throw new InvalidDataException();
+            throw new \Exception("Invalid data entered!");
         }
 
         return !empty($stmt->execute()) ? true : false;
@@ -97,7 +111,7 @@ class ModelUser extends Model
         $stmt->bindValue(':id', $this->id, SQLITE3_TEXT);
 
         if (!$this->isValid()) {
-            throw new InvalidDataException();
+            throw new \Exception("Invalid data entered!");
         }
 
         return !empty($stmt->execute()) ? true : false;
@@ -139,6 +153,25 @@ class ModelUser extends Model
 
         $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
         
+        if ($result) {
+            $this->mapResult($result);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param string $token
+     * @return Model
+     */
+    public function findByActivationToken(string $token) : Model
+    {
+        $stmt = $this->db->prepare('SELECT * FROM user WHERE activation_token=:activation_token LIMIT 1');
+
+        $stmt->bindValue(':activation_token', $token, SQLITE3_TEXT);
+
+        $result = $stmt->execute()->fetchArray(SQLITE3_ASSOC);
+
         if ($result) {
             $this->mapResult($result);
         }
@@ -224,6 +257,7 @@ class ModelUser extends Model
         $this->username = $result['username'] ?? "";
         $this->password = $result['password'] ?? "";
         $this->email = $result['email'] ?? "";
+        $this->activation_token = $result['activation_token'] ?? "";
         $this->is_active = $result['is_active'] ?? 0;
     }
 
@@ -233,5 +267,10 @@ class ModelUser extends Model
     public function isValid() : bool
     {
         return $this->validator->isValid($this);
+    }
+
+    private function generateActivationToken()
+    {
+        $this->activation_token = bin2hex(random_bytes(20));
     }
 }

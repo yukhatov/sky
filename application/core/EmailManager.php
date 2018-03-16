@@ -17,6 +17,17 @@ use PHPMailer\PHPMailer\PHPMailer;
  */
 class EmailManager implements EmailManagerInterface
 {
+    private $config;
+    
+    public function __construct()
+    {
+        $this->config = @parse_ini_file(__DIR__ . '/../../config.ini', true);
+
+        if (!$this->config) {
+            throw new \Exception("Config file parsing error!");
+        }
+    }
+    
     /**
      * @param string $username
      * @return bool
@@ -34,12 +45,12 @@ class EmailManager implements EmailManagerInterface
         $mail->SMTPSecure = "tls";
         $mail->Host       = "ssl://smtp.gmail.com";
         $mail->Port       = 465;
-        $mail->Username   = $config['email']['username'];
-        $mail->Password   = $config['email']['password'];
+        $mail->Username   = $this->config['email']['username'];
+        $mail->Password   = $this->config['email']['password'];
         $mail->SetFrom('n0stradamus1199@gmail.com', 'Manager');
         $mail->Subject    = "Account activation";
         $mail->AltBody    = "To view the message, please use an HTML compatible email viewer!";
-        $mail->MsgHTML($this->generateBody($user->getId()));
+        $mail->MsgHTML($this->generateBody($user->getActivationToken()));
         $address = $user->getEmail();
         $mail->AddAddress($address, "John Doe");
 
@@ -47,16 +58,16 @@ class EmailManager implements EmailManagerInterface
     }
 
     /**
-     * @param int $userId
+     * @param string $token
      * @return string
      */
-    private function generateBody(int $userId) : string
+    private function generateBody(string $token) : string
     {
         $link = 'http://' .
             $_SERVER['SERVER_NAME'] . ':' .
             $_SERVER['SERVER_PORT'] .
             $_SERVER['SCRIPT_NAME'] .
-            sprintf("?route=user/activate&id=%d", $userId);
+            sprintf("?route=user/activate&token=%s", $token);
 
         return "Click here to activate your account: $link";
     }

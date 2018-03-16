@@ -66,7 +66,10 @@ class Controller
 
         return false;
     }
-    
+
+    /**
+     * @throws \Exception if user not found
+     */
     protected function auth()
     {
         if (!$this->isLoggedIn()) {

@@ -59,7 +59,7 @@ class SqliteDatabaseConnection implements DatabaseConnectionInterface
         }
 
         $db->exec('CREATE TABLE IF NOT EXISTS user 
-          (id INTEGER PRIMARY KEY AUTOINCREMENT, username STRING, password STRING, email STRING, is_active BOOL)');
+          (id INTEGER PRIMARY KEY AUTOINCREMENT, username STRING, password STRING, email STRING, activation_token STRING, is_active BOOL)');
         $db->exec('CREATE UNIQUE INDEX IF NOT EXISTS username ON user(username)');
         $db->exec('CREATE UNIQUE INDEX IF NOT EXISTS email ON user(email)');
 

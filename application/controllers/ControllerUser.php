@@ -49,8 +49,8 @@ class ControllerUser extends Controller
      */
     public function actionActivate()
     {
-        if (isset($_GET['id'])) {
-            $user = (new ModelUser())->findById($_GET['id']);
+        if (isset($_GET['token'])) {
+            $user = (new ModelUser())->findByActivationToken($_GET['token']);
 
             if ($user->getId() != 0 and $user->activate()) {
                 return header(sprintf(
@@ -109,7 +109,7 @@ class ControllerUser extends Controller
                         )
                     );
                 }
-            } catch (InvalidDataException $e) {
+            } catch (\Exception $e) {
                 return header(sprintf(
                         "Location: %s&error=%s",
                         $this->config['route']['user'],
@@ -160,7 +160,7 @@ class ControllerUser extends Controller
                         $this->config['route']['register'],
                         urlencode('User: ' . $user->getUsername() . ' created. Please check your email for activation.')));
                 }
-            } catch (InvalidDataException $e) {
+            } catch (\Exception $e) {
                 return header(sprintf(
                         "Location: %s&error=%s",
                         $this->config['route']['register'],
